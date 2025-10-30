@@ -1,9 +1,14 @@
-import { Users, Calendar, CheckCircle, TrendingUp } from "lucide-react";
+import { Users, Calendar, CheckCircle, TrendingUp, UserCircle, Moon, Sun } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useTheme } from "next-themes";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Dashboard = () => {
+  const { theme, setTheme } = useTheme();
+  const { user } = useAuth();
+
   const stats = [
     {
       title: "Total Members",
@@ -40,8 +45,27 @@ const Dashboard = () => {
       {/* Header */}
       <header className="bg-gradient-primary border-b border-border">
         <div className="container mx-auto px-6 py-8">
-          <h1 className="text-3xl font-bold text-primary-foreground mb-2">Church Attendance</h1>
-          <p className="text-primary-foreground/80">Manage your congregation with ease</p>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-primary-foreground mb-2">Church Attendance</h1>
+              <p className="text-primary-foreground/80">Welcome back, {user?.name}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="text-primary-foreground hover:bg-primary-foreground/10"
+              >
+                {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              </Button>
+              <Link to="/profile">
+                <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/10">
+                  <UserCircle className="h-5 w-5" />
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -67,7 +91,7 @@ const Dashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Card className="shadow-soft hover:shadow-medium transition-shadow">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -95,6 +119,23 @@ const Dashboard = () => {
               <Link to="/members">
                 <Button variant="outline" className="w-full">
                   View Members
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-soft hover:shadow-medium transition-shadow">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                Groups
+              </CardTitle>
+              <CardDescription>Organize ministry groups</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link to="/groups">
+                <Button variant="outline" className="w-full">
+                  View Groups
                 </Button>
               </Link>
             </CardContent>
