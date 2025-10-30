@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Search, UserPlus, Phone, Mail, ArrowLeft } from "lucide-react";
+import { Search, UserPlus, Phone, Mail } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Link } from "react-router-dom";
 
 // Sample data
 const sampleMembers = [
@@ -34,23 +33,13 @@ const Members = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-gradient-primary border-b border-border">
-        <div className="container mx-auto px-6 py-8">
-          <Link to="/" className="inline-flex items-center text-primary-foreground mb-4 hover:opacity-80 transition-opacity">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
-          </Link>
-          <h1 className="text-3xl font-bold text-primary-foreground mb-2">Member Directory</h1>
-          <p className="text-primary-foreground/80">Manage your congregation members</p>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="container mx-auto px-6 py-8">
-        {/* Search and Add */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+    <div className="container mx-auto px-6 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Member Directory</h1>
+        <p className="text-muted-foreground">Manage your congregation members</p>
+      </div>
+      {/* Search and Add */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-8">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -64,11 +53,11 @@ const Members = () => {
           <Button className="sm:w-auto">
             <UserPlus className="h-4 w-4 mr-2" />
             Add Member
-          </Button>
-        </div>
+        </Button>
+      </div>
 
-        {/* Members Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {/* Members Grid */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredMembers.map((member) => (
             <Card key={member.id} className="shadow-soft hover:shadow-medium transition-shadow">
               <CardHeader>
@@ -94,20 +83,19 @@ const Members = () => {
                   <span>{member.email}</span>
                 </div>
               </CardContent>
-            </Card>
-          ))}
-        </div>
+          </Card>
+        ))}
+      </div>
 
-        {filteredMembers.length === 0 && (
+      {filteredMembers.length === 0 && (
           <Card className="shadow-soft">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Search className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-lg font-medium text-foreground mb-1">No members found</p>
               <p className="text-sm text-muted-foreground">Try adjusting your search query</p>
-            </CardContent>
-          </Card>
-        )}
-      </main>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

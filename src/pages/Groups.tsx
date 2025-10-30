@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Plus, Users, ArrowLeft } from "lucide-react";
+import { Search, Plus, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -50,19 +50,11 @@ const Groups = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="bg-gradient-primary border-b border-border">
-        <div className="container mx-auto px-6 py-8">
-          <Link to="/" className="inline-flex items-center text-primary-foreground mb-4 hover:opacity-80 transition-opacity">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
-          </Link>
-          <h1 className="text-3xl font-bold text-primary-foreground mb-2">Groups</h1>
-          <p className="text-primary-foreground/80">Organize members into ministry groups</p>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-6 py-8">
+    <div className="container mx-auto px-6 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Groups</h1>
+        <p className="text-muted-foreground">Organize members into ministry groups</p>
+      </div>
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -118,45 +110,46 @@ const Groups = () => {
           </Dialog>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredGroups.map((group) => (
-            <Card key={group.id} className="shadow-soft hover:shadow-medium transition-shadow">
-              <CardHeader>
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-gradient-secondary rounded-lg">
-                    <Users className="h-6 w-6 text-secondary-foreground" />
-                  </div>
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">{group.name}</CardTitle>
-                    <CardDescription>{group.description}</CardDescription>
-                  </div>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {filteredGroups.map((group) => (
+          <Card key={group.id} className="shadow-soft hover:shadow-medium transition-shadow">
+            <CardHeader>
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-gradient-secondary rounded-lg">
+                  <Users className="h-6 w-6 text-secondary-foreground" />
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-2xl font-bold text-primary">{group.memberCount}</p>
-                    <p className="text-sm text-muted-foreground">Members</p>
-                  </div>
+                <div className="flex-1">
+                  <CardTitle className="text-lg">{group.name}</CardTitle>
+                  <CardDescription>{group.description}</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-2xl font-bold text-primary">{group.memberCount}</p>
+                  <p className="text-sm text-muted-foreground">Members</p>
+                </div>
+                <Link to={`/groups/${group.id}`}>
                   <Button variant="outline" size="sm">
                     View
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {filteredGroups.length === 0 && (
-          <Card className="shadow-soft">
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <Search className="h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-lg font-medium text-foreground mb-1">No groups found</p>
-              <p className="text-sm text-muted-foreground">Try adjusting your search query</p>
+                </Link>
+              </div>
             </CardContent>
           </Card>
-        )}
-      </main>
+        ))}
+      </div>
+
+      {filteredGroups.length === 0 && (
+        <Card className="shadow-soft">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Search className="h-12 w-12 text-muted-foreground mb-4" />
+            <p className="text-lg font-medium text-foreground mb-1">No groups found</p>
+            <p className="text-sm text-muted-foreground">Try adjusting your search query</p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

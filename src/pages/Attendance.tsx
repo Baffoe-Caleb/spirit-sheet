@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Search, CheckCircle, Circle, ArrowLeft, Calendar } from "lucide-react";
+import { Search, CheckCircle, Circle, Calendar } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 // Sample data
@@ -51,23 +50,13 @@ const Attendance = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-gradient-primary border-b border-border">
-        <div className="container mx-auto px-6 py-8">
-          <Link to="/" className="inline-flex items-center text-primary-foreground mb-4 hover:opacity-80 transition-opacity">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
-          </Link>
-          <h1 className="text-3xl font-bold text-primary-foreground mb-2">Record Attendance</h1>
-          <p className="text-primary-foreground/80">Mark who attended today's service</p>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="container mx-auto px-6 py-8">
-        {/* Service Info */}
-        <Card className="shadow-soft mb-8">
+    <div className="container mx-auto px-6 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Record Attendance</h1>
+        <p className="text-muted-foreground">Mark who attended today's service</p>
+      </div>
+      {/* Service Info */}
+      <Card className="shadow-soft mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-primary" />
@@ -85,11 +74,11 @@ const Attendance = () => {
                 Save Attendance
               </Button>
             </div>
-          </CardContent>
-        </Card>
+        </CardContent>
+      </Card>
 
-        {/* Search */}
-        <div className="mb-6">
+      {/* Search */}
+      <div className="mb-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -98,12 +87,12 @@ const Attendance = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
-            />
-          </div>
+          />
         </div>
+      </div>
 
-        {/* Members List */}
-        <div className="grid gap-4 md:grid-cols-2">
+      {/* Members List */}
+      <div className="grid gap-4 md:grid-cols-2">
           {filteredMembers.map((member) => {
             const isSelected = selectedMembers.has(member.id);
             return (
@@ -133,20 +122,19 @@ const Attendance = () => {
                   )}
                 </CardContent>
               </Card>
-            );
-          })}
-        </div>
+          );
+        })}
+      </div>
 
-        {filteredMembers.length === 0 && (
+      {filteredMembers.length === 0 && (
           <Card className="shadow-soft">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Search className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-lg font-medium text-foreground mb-1">No members found</p>
               <p className="text-sm text-muted-foreground">Try adjusting your search query</p>
-            </CardContent>
-          </Card>
-        )}
-      </main>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

@@ -1,12 +1,10 @@
-import { Users, Calendar, CheckCircle, TrendingUp, UserCircle, Moon, Sun } from "lucide-react";
+import { Users, Calendar, CheckCircle, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useTheme } from "next-themes";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Dashboard = () => {
-  const { theme, setTheme } = useTheme();
   const { user } = useAuth();
 
   const stats = [
@@ -41,38 +39,13 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-gradient-primary border-b border-border">
-        <div className="container mx-auto px-6 py-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-primary-foreground mb-2">Church Attendance</h1>
-              <p className="text-primary-foreground/80">Welcome back, {user?.name}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="text-primary-foreground hover:bg-primary-foreground/10"
-              >
-                {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-              </Button>
-              <Link to="/profile">
-                <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/10">
-                  <UserCircle className="h-5 w-5" />
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="container mx-auto px-6 py-8">
-        {/* Stats Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+    <div className="container mx-auto px-6 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
+        <p className="text-muted-foreground">Welcome back, {user?.name}</p>
+      </div>
+      {/* Stats Grid */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
           {stats.map((stat) => (
             <Card key={stat.title} className="shadow-soft hover:shadow-medium transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -87,11 +60,11 @@ const Dashboard = () => {
                 <p className="text-xs text-secondary font-medium">{stat.trend}</p>
               </CardContent>
             </Card>
-          ))}
-        </div>
+        ))}
+      </div>
 
-        {/* Quick Actions */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      {/* Quick Actions */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Card className="shadow-soft hover:shadow-medium transition-shadow">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -154,11 +127,11 @@ const Dashboard = () => {
                 View Reports
               </Button>
             </CardContent>
-          </Card>
-        </div>
+        </Card>
+      </div>
 
-        {/* Recent Activity */}
-        <Card className="mt-8 shadow-soft">
+      {/* Recent Activity */}
+      <Card className="mt-8 shadow-soft">
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
             <CardDescription>Latest attendance records</CardDescription>
@@ -181,10 +154,9 @@ const Dashboard = () => {
                   </div>
                 </div>
               ))}
-            </div>
-          </CardContent>
-        </Card>
-      </main>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
