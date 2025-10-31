@@ -1,16 +1,20 @@
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/reducers";
-import keycloak from "@/services/keycloak";
+import { useAuth0 } from "@auth0/auth0-react";
+import { useEffect } from "react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
 
-  if (!isAuthenticated) {
-    keycloak.login();
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      loginWithRedirect();
+    }
+  }, [isLoading, isAuthenticated, loginWithRedirect]);
+
+  if (isLoading || !isAuthenticated) {
     return null;
   }
 

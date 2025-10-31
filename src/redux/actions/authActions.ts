@@ -1,30 +1,26 @@
-export const KEYCLOAK_INIT_REQUEST = 'KEYCLOAK_INIT_REQUEST';
-export const KEYCLOAK_INIT_SUCCESS = 'KEYCLOAK_INIT_SUCCESS';
-export const KEYCLOAK_INIT_FAILURE = 'KEYCLOAK_INIT_FAILURE';
-export const LOGOUT_REQUEST = 'LOGOUT_REQUEST';
+export const AUTH0_LOGIN_SUCCESS = 'AUTH0_LOGIN_SUCCESS';
+export const AUTH0_LOGOUT = 'AUTH0_LOGOUT';
+export const AUTH0_USER_LOADED = 'AUTH0_USER_LOADED';
 
-export interface KeycloakUser {
+export interface Auth0User {
   id: string;
   username: string;
   email: string;
   firstName: string;
   lastName: string;
+  picture?: string;
 }
 
-export const keycloakInitRequest = () => ({
-  type: KEYCLOAK_INIT_REQUEST,
+export const auth0LoginSuccess = (user: Auth0User) => ({
+  type: AUTH0_LOGIN_SUCCESS,
+  payload: user,
 });
 
-export const keycloakInitSuccess = (user: KeycloakUser, token: string) => ({
-  type: KEYCLOAK_INIT_SUCCESS,
-  payload: { user, token },
+export const auth0Logout = () => ({
+  type: AUTH0_LOGOUT,
 });
 
-export const keycloakInitFailure = (error: string) => ({
-  type: KEYCLOAK_INIT_FAILURE,
-  payload: error,
-});
-
-export const logoutRequest = () => ({
-  type: LOGOUT_REQUEST,
+export const auth0UserLoaded = (user: Auth0User) => ({
+  type: AUTH0_USER_LOADED,
+  payload: user,
 });

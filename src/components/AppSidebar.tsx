@@ -1,7 +1,8 @@
 import { CheckCircle, Users, UsersRound, BarChart3, UserCircle, Settings, LogOut } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
 import { useDispatch } from "react-redux";
-import { logoutRequest } from "@/redux/actions/authActions";
+import { auth0Logout } from "@/redux/actions/authActions";
 import {
   Sidebar,
   SidebarContent,
@@ -29,10 +30,12 @@ const bottomItems = [
 export function AppSidebar() {
   const { state } = useSidebar();
   const dispatch = useDispatch();
+  const { logout } = useAuth0();
   const collapsed = state === "collapsed";
 
   const handleLogout = () => {
-    dispatch(logoutRequest());
+    dispatch(auth0Logout());
+    logout({ logoutParams: { returnTo: window.location.origin } });
   };
 
   return (

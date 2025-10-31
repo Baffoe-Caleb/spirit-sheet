@@ -1,18 +1,21 @@
 import { User, Mail, Shield } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useDispatch, useSelector } from "react-redux";
+import { useAuth0 } from "@auth0/auth0-react";
 import { RootState } from "@/redux/reducers";
-import { logoutRequest } from "@/redux/actions/authActions";
+import { auth0Logout } from "@/redux/actions/authActions";
 import { toast } from "sonner";
 
 const Profile = () => {
   const dispatch = useDispatch();
+  const { logout } = useAuth0();
   const { user } = useSelector((state: RootState) => state.auth);
 
   const handleLogout = () => {
-    dispatch(logoutRequest());
+    dispatch(auth0Logout());
+    logout({ logoutParams: { returnTo: window.location.origin } });
     toast.success("Logged out successfully");
   };
 
@@ -40,6 +43,7 @@ const Profile = () => {
             <CardContent>
               <div className="flex items-start gap-6">
                 <Avatar className="h-20 w-20 bg-gradient-secondary">
+                  {user?.picture && <AvatarImage src={user.picture} alt={user.username} />}
                   <AvatarFallback className="bg-secondary text-secondary-foreground font-bold text-2xl">
                     {user ? getInitials(`${user.firstName} ${user.lastName}`) : "U"}
                   </AvatarFallback>

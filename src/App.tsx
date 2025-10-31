@@ -4,10 +4,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Provider, useDispatch, useSelector } from "react-redux";
+import { Provider, useDispatch } from "react-redux";
+import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
 import store from "./redux/store";
-import { keycloakInitRequest } from "./redux/actions/authActions";
-import { RootState } from "./redux/reducers";
+import { auth0UserLoaded } from "./redux/actions/authActions";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Layout } from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
@@ -23,20 +23,33 @@ import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
 
+const auth0Domain = import.meta.env.VITE_AUTH0_DOMAIN;
+const auth0ClientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
+
 const AppContent = () => {
   const dispatch = useDispatch();
-  const { loading, isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { isLoading, isAuthenticated, user } = useAuth0();
 
   useEffect(() => {
-    dispatch(keycloakInitRequest());
-  }, [dispatch]);
+    if (isAuthenticated && user) {
+      const auth0User = {
+        id: user.sub || '',
+        username: user.nickname || user.name || '',
+        email: user.email || '',
+        firstName: user.given_name || user.name?.split(' ')[0] || '',
+        lastName: user.family_name || user.name?.split(' ').slice(1).join(' ') || '',
+        picture: user.picture,
+      };
+      dispatch(auth0UserLoaded(auth0User));
+    }
+  }, [isAuthenticated, user, dispatch]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
-          <p className="text-muted-foreground">Initializing authentication...</p>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -60,15 +73,23 @@ const AppContent = () => {
 };
 
 const App = () => (
-  <Provider store={store}>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <AppContent />
-      </TooltipProvider>
-    </QueryClientProvider>
-  </Provider>
+  <Auth0Provider
+    domain={auth0Domain}
+    clientId={auth0ClientId}
+    authorizationParams={{
+      redirect_uri: window.location.origin
+    }}
+  >
+    <Provider store={store}>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <AppContent />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </Provider>
+  </Auth0Provider>
 );
 
 export default App;
