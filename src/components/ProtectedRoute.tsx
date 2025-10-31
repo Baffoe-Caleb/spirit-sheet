@@ -1,15 +1,17 @@
-import { Navigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/reducers";
+import keycloak from "@/services/keycloak";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    keycloak.login();
+    return null;
   }
 
   return <>{children}</>;

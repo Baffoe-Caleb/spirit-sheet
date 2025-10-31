@@ -2,10 +2,12 @@ import { Users, Calendar, CheckCircle, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/reducers";
+import CategoryList from "@/components/CategoryList";
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user } = useSelector((state: RootState) => state.auth);
 
   const stats = [
     {
@@ -42,7 +44,7 @@ const Dashboard = () => {
     <div className="container mx-auto px-6 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back, {user?.name}</p>
+        <p className="text-muted-foreground">Welcome back, {user?.firstName || user?.username}</p>
       </div>
       {/* Stats Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
@@ -128,6 +130,11 @@ const Dashboard = () => {
               </Button>
             </CardContent>
         </Card>
+      </div>
+
+      {/* Category List Component */}
+      <div className="mt-8">
+        <CategoryList />
       </div>
 
       {/* Recent Activity */}

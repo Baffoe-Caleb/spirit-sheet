@@ -2,18 +2,18 @@ import { User, Mail, Shield } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/redux/reducers";
+import { logoutRequest } from "@/redux/actions/authActions";
 import { toast } from "sonner";
 
 const Profile = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { user } = useSelector((state: RootState) => state.auth);
 
   const handleLogout = () => {
-    logout();
+    dispatch(logoutRequest());
     toast.success("Logged out successfully");
-    navigate("/login");
   };
 
   const getInitials = (name: string) => {
@@ -41,7 +41,7 @@ const Profile = () => {
               <div className="flex items-start gap-6">
                 <Avatar className="h-20 w-20 bg-gradient-secondary">
                   <AvatarFallback className="bg-secondary text-secondary-foreground font-bold text-2xl">
-                    {user ? getInitials(user.name) : "U"}
+                    {user ? getInitials(`${user.firstName} ${user.lastName}`) : "U"}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 space-y-4">
@@ -49,7 +49,7 @@ const Profile = () => {
                     <User className="h-5 w-5 text-muted-foreground" />
                     <div>
                       <p className="text-sm text-muted-foreground">Name</p>
-                      <p className="font-medium">{user?.name}</p>
+                      <p className="font-medium">{user?.firstName} {user?.lastName}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
@@ -62,8 +62,8 @@ const Profile = () => {
                   <div className="flex items-center gap-3">
                     <Shield className="h-5 w-5 text-muted-foreground" />
                     <div>
-                      <p className="text-sm text-muted-foreground">Role</p>
-                      <p className="font-medium">{user?.role}</p>
+                      <p className="text-sm text-muted-foreground">Username</p>
+                      <p className="font-medium">{user?.username}</p>
                     </div>
                   </div>
                 </div>

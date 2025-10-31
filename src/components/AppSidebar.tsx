@@ -1,5 +1,7 @@
-import { CheckCircle, Users, UsersRound, BarChart3, UserCircle, Settings } from "lucide-react";
+import { CheckCircle, Users, UsersRound, BarChart3, UserCircle, Settings, LogOut } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logoutRequest } from "@/redux/actions/authActions";
 import {
   Sidebar,
   SidebarContent,
@@ -26,7 +28,12 @@ const bottomItems = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
+  const dispatch = useDispatch();
   const collapsed = state === "collapsed";
+
+  const handleLogout = () => {
+    dispatch(logoutRequest());
+  };
 
   return (
     <Sidebar collapsible="icon">
@@ -72,6 +79,12 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton onClick={handleLogout} tooltip="Logout">
+                  <LogOut />
+                  <span>Logout</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
