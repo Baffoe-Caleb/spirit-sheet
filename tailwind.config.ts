@@ -52,10 +52,15 @@ export default {
       backgroundImage: {
         'gradient-primary': 'var(--gradient-primary)',
         'gradient-secondary': 'var(--gradient-secondary)',
+        'gradient-mesh': 'var(--gradient-mesh)',
       },
       boxShadow: {
         'soft': 'var(--shadow-soft)',
         'medium': 'var(--shadow-medium)',
+        'glass': 'var(--shadow-glass)',
+      },
+      backdropBlur: {
+        'glass': '16px',
       },
       borderRadius: {
         lg: "var(--radius)",

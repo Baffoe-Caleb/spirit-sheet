@@ -8,6 +8,7 @@ import { Provider, useDispatch } from "react-redux";
 import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
 import store from "./redux/store";
 import { auth0UserLoaded } from "./redux/actions/authActions";
+import { setAuthToken } from "./services/api";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Layout } from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
@@ -28,21 +29,33 @@ const auth0ClientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
 
 const AppContent = () => {
   const dispatch = useDispatch();
-  const { isLoading, isAuthenticated, user } = useAuth0();
+  const { isLoading, isAuthenticated, user, getAccessTokenSilently } = useAuth0();
 
   useEffect(() => {
-    if (isAuthenticated && user) {
-      const auth0User = {
-        id: user.sub || '',
-        username: user.nickname || user.name || '',
-        email: user.email || '',
-        firstName: user.given_name || user.name?.split(' ')[0] || '',
-        lastName: user.family_name || user.name?.split(' ').slice(1).join(' ') || '',
-        picture: user.picture,
-      };
-      dispatch(auth0UserLoaded(auth0User));
-    }
-  }, [isAuthenticated, user, dispatch]);
+    const setupAuth = async () => {
+      if (isAuthenticated && user) {
+        const auth0User = {
+          id: user.sub || '',
+          username: user.nickname || user.name || '',
+          email: user.email || '',
+          firstName: user.given_name || user.name?.split(' ')[0] || '',
+          lastName: user.family_name || user.name?.split(' ').slice(1).join(' ') || '',
+          picture: user.picture,
+        };
+        dispatch(auth0UserLoaded(auth0User));
+
+        // Get access token and set it for API calls
+        try {
+          const token = await getAccessTokenSilently();
+          setAuthToken(token);
+        } catch (error) {
+          console.error('Error getting access token:', error);
+        }
+      }
+    };
+
+    setupAuth();
+  }, [isAuthenticated, user, dispatch, getAccessTokenSilently]);
 
   if (isLoading) {
     return (
@@ -77,7 +90,8 @@ const App = () => (
     domain={auth0Domain}
     clientId={auth0ClientId}
     authorizationParams={{
-      redirect_uri: window.location.origin
+      redirect_uri: window.location.origin,
+      audience: import.meta.env.VITE_AUTH0_AUDIENCE,
     }}
   >
     <Provider store={store}>
