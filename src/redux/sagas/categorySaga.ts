@@ -6,10 +6,11 @@ import {
   fetchCategoriesFailure,
 } from '../actions/categoryActions';
 
+
 function* fetchCategoriesSaga(): Generator<any, void, any> {
   try {
-    const response = yield call(api.get, '/categories');
-    
+    const response = yield call(api.getCategories);
+
     if (response.ok && response.data) {
       yield put(fetchCategoriesSuccess(response.data));
     } else {

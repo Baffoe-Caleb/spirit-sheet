@@ -1,21 +1,19 @@
 import { create } from 'apisauce';
+import apisauce from 'apisauce';
 
-const api = create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+const createApi = apisauce.create({
+  baseURL: "http://localhost:5000",
+  // baseURL: "https://api.chucknorris.io/jokes",
   headers: {
-    'Content-Type': 'application/json',
+    "Cache-Control": "no-cache",
   },
-  timeout: 10000,
-});
+  timeout: 60000,
+})
 
-// Function to set auth token
-export const setAuthToken = (token: string) => {
-  api.setHeader('Authorization', `Bearer ${token}`);
-};
 
-// Function to remove auth token
-export const removeAuthToken = () => {
-  api.deleteHeader('Authorization');
-};
 
-export default api;
+const getCategories = () => createApi.get("/categories")
+
+const getMembers = () => createApi.get("api/members")
+
+export default { getCategories, getMembers }

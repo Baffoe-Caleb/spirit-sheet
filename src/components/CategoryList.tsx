@@ -12,6 +12,9 @@ const CategoryList = () => {
   const dispatch = useDispatch();
   const { categories, loading, error } = useSelector((state: RootState) => state.categories);
 
+
+  console.log(error);
+
   useEffect(() => {
     dispatch(fetchCategoriesRequest());
   }, [dispatch]);
@@ -28,8 +31,8 @@ const CategoryList = () => {
             <CardTitle>Chuck Norris Joke Categories</CardTitle>
             <CardDescription>Testing Redux Saga with API integration</CardDescription>
           </div>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="icon"
             onClick={handleRefresh}
             disabled={loading}

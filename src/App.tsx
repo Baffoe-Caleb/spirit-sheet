@@ -23,9 +23,14 @@ import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
+console.log(import.meta.env);
 
 const auth0Domain = import.meta.env.VITE_AUTH0_DOMAIN;
 const auth0ClientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
+
+console.log(auth0Domain);
+console.log(auth0ClientId);
+
 
 const AppContent = () => {
   const dispatch = useDispatch();
