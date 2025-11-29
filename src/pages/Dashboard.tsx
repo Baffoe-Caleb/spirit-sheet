@@ -2,12 +2,27 @@ import { Users, Calendar, CheckCircle, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useEffect } from 'react';
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/reducers";
 import CategoryList from "@/components/CategoryList";
+import { fetchMembersRequest } from "@/redux/actions/memberActions";
 
 const Dashboard = () => {
   const { user } = useSelector((state: RootState) => state.auth);
+
+  const dispatch = useDispatch();
+  const { members, loading, error } = useSelector((state: RootState) => state.members);
+
+
+  console.log(error);
+  console.log(members);
+  console.log(loading);
+
+  useEffect(() => {
+    dispatch(fetchMembersRequest());
+  }, [dispatch]);
+
 
   const stats = [
     {
