@@ -8,7 +8,7 @@ import { Provider, useDispatch } from "react-redux";
 import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
 import store from "./redux/store";
 import { auth0UserLoaded } from "./redux/actions/authActions";
-import { setAuthToken } from "./services/api";
+// import { setAuthToken } from "./services/api";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Layout } from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
@@ -21,21 +21,11 @@ import Settings from "./pages/Settings";
 import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
-
+import auth0Config from "./auth0Config";
 const queryClient = new QueryClient();
-console.log(import.meta.env);
-
-const auth0Domain = import.meta.env.VITE_AUTH0_DOMAIN;
-const auth0ClientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
-
-console.log(auth0Domain);
-console.log(auth0ClientId);
-
-
 const AppContent = () => {
   const dispatch = useDispatch();
   const { isLoading, isAuthenticated, user, getAccessTokenSilently } = useAuth0();
-
   useEffect(() => {
     const setupAuth = async () => {
       if (isAuthenticated && user) {
@@ -48,20 +38,18 @@ const AppContent = () => {
           picture: user.picture,
         };
         dispatch(auth0UserLoaded(auth0User));
-
-        // Get access token and set it for API calls
+        // Get access token for API calls
         try {
           const token = await getAccessTokenSilently();
-          setAuthToken(token);
+          console.log('Access token:', token);
+          // setAuthToken(token);
         } catch (error) {
           console.error('Error getting access token:', error);
         }
       }
     };
-
     setupAuth();
   }, [isAuthenticated, user, dispatch, getAccessTokenSilently]);
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -72,7 +60,6 @@ const AppContent = () => {
       </div>
     );
   }
-
   return (
     <BrowserRouter>
       <Routes>
@@ -89,14 +76,14 @@ const AppContent = () => {
     </BrowserRouter>
   );
 };
-
 const App = () => (
   <Auth0Provider
-    domain={auth0Domain}
-    clientId={auth0ClientId}
+    domain={auth0Config.domain}
+    clientId={auth0Config.clientId}
     authorizationParams={{
-      redirect_uri: window.location.origin,
-      audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+      redirect_uri: auth0Config.redirectUri,
+      audience: auth0Config.audience,
+      scope: auth0Config.scope
     }}
   >
     <Provider store={store}>
@@ -110,5 +97,4 @@ const App = () => (
     </Provider>
   </Auth0Provider>
 );
-
 export default App;
