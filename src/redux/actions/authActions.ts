@@ -24,3 +24,18 @@ export const auth0UserLoaded = (user: Auth0User) => ({
   type: AUTH0_USER_LOADED,
   payload: user,
 });
+
+// src/redux/actions/authActions.ts
+export const USER_SYNCED = 'USER_SYNCED';
+export const AUTH_ERROR = 'AUTH_ERROR';
+
+
+export const userSynced = (data: any) => ({
+  type: USER_SYNCED,
+  payload: data,
+});
+
+export const authError = (error: string) => ({
+  type: AUTH_ERROR,
+  payload: error,
+});

@@ -60,7 +60,6 @@ const Dashboard = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
         <p className="text-muted-foreground">Welcome back, {user?.firstName || user?.username}</p>
-        <button>Click me </button>
       </div>
       {/* Stats Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
@@ -147,12 +146,6 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
-
-      {/* Category List Component */}
-      <div className="mt-8">
-        <CategoryList />
-      </div>
-
       {/* Recent Activity */}
       <Card className="mt-8 shadow-soft">
         <CardHeader>

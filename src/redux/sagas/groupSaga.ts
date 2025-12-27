@@ -1,5 +1,5 @@
 import { call, put, takeLatest } from 'redux-saga/effects';
-import api from '../../services/api';
+import * as api from "../../services/api"
 import {
   FETCH_GROUPS_REQUEST,
   CREATE_GROUP_REQUEST,
