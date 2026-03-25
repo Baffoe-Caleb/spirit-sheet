@@ -75,6 +75,7 @@ const authReducer = (state = initialState, action: AuthActionTypes): AuthState =
     case USER_SYNCED:
       return {
         ...state,
+        loading: false, // ✅ Add this
         syncedUser: action.payload?.user || action.payload,
         organization: action.payload?.organization || state.organization,
         syncError: null,

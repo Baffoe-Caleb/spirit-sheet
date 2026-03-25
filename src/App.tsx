@@ -7,13 +7,14 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Provider, useDispatch } from "react-redux";
 import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
 import store from "./redux/store";
-import { auth0UserLoaded } from "./redux/actions/authActions";
+import { auth0UserLoaded, userSynced } from "./redux/actions/authActions";
 import {
   setAuthToken,
   getCurrentUser,
   GetCurrentUserResponse,
 } from "./services/api";
 import ProtectedRoute from "./components/ProtectedRoute";
+import RoleGuard from "./components/RoleGuard";
 import { Layout } from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import Members from "./pages/Members";
@@ -25,9 +26,11 @@ import Settings from "./pages/Settings";
 import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
 import RegisterChurch from "./pages/RegisterChurch";
+import AcceptInvitation from "./pages/AcceptInvitation";
 import { Loader2 } from "lucide-react";
 import auth0Config from "./auth0Config";
 import Finance from "./pages/Finance";
+import CellZones from "./pages/CellZones";
 
 const queryClient = new QueryClient();
 
@@ -100,29 +103,33 @@ const AppContent = () => {
               // User exists and is registered
               console.log('✅ User is registered:', userData.data.user.email);
               console.log('🏢 Organization:', userData.data.organization?.name);
+              console.log('🔑 Role:', userData.data.user.role);
+
+              // Sync the backend user + organization to Redux
+              // This is what useRoleAccess reads from (state.auth.syncedUser.role)
+              dispatch(userSynced({
+                user: userData.data.user,
+                organization: userData.data.organization,
+              }));
+
               setAuthState('ready');
             } else {
-              // Unexpected response structure
               console.warn('⚠️ Unexpected response structure:', userData);
               setAuthState('needs-registration');
             }
           } else {
-            // Handle error responses
             console.log('📋 User check failed:', {
               status: userResponse.status,
               problem: userResponse.problem,
             });
 
             if (userResponse.status === 404) {
-              // User not found - needs to register
               console.log('📝 User not found in database, needs registration');
               setAuthState('needs-registration');
             } else if (userResponse.status === 401) {
-              // Token issue
               console.error('🔒 Authentication failed');
               setAuthState('error');
             } else if (userResponse.status === 500) {
-              // Server error - check the message
               const errorData = userResponse.data as any;
               if (errorData?.message?.includes('not found') ||
                 errorData?.message?.includes('User not found')) {
@@ -133,7 +140,6 @@ const AppContent = () => {
                 setAuthState('error');
               }
             } else {
-              // Other error
               console.error('❌ Unexpected error');
               setAuthState('error');
             }
@@ -208,12 +214,22 @@ const AppContent = () => {
           }
         />
 
-        {/* Protected routes */}
+        {/* Accept invitation route — accessible without full auth */}
+        <Route
+          path="/accept-invitation"
+          element={<AcceptInvitation />}
+        />
+
+        {/* Protected routes with RoleGuard */}
         <Route
           path="/"
           element={
             <ProtectedRouteWrapper>
-              <Layout><Dashboard /></Layout>
+              <Layout>
+                <RoleGuard page="dashboard">
+                  <Dashboard />
+                </RoleGuard>
+              </Layout>
             </ProtectedRouteWrapper>
           }
         />
@@ -221,7 +237,11 @@ const AppContent = () => {
           path="/members"
           element={
             <ProtectedRouteWrapper>
-              <Layout><Members /></Layout>
+              <Layout>
+                <RoleGuard page="members">
+                  <Members />
+                </RoleGuard>
+              </Layout>
             </ProtectedRouteWrapper>
           }
         />
@@ -229,7 +249,11 @@ const AppContent = () => {
           path="/attendance"
           element={
             <ProtectedRouteWrapper>
-              <Layout><Attendance /></Layout>
+              <Layout>
+                <RoleGuard page="attendance">
+                  <Attendance />
+                </RoleGuard>
+              </Layout>
             </ProtectedRouteWrapper>
           }
         />
@@ -237,7 +261,11 @@ const AppContent = () => {
           path="/groups"
           element={
             <ProtectedRouteWrapper>
-              <Layout><Groups /></Layout>
+              <Layout>
+                <RoleGuard page="groups">
+                  <Groups />
+                </RoleGuard>
+              </Layout>
             </ProtectedRouteWrapper>
           }
         />
@@ -245,7 +273,11 @@ const AppContent = () => {
           path="/groups/:id"
           element={
             <ProtectedRouteWrapper>
-              <Layout><GroupDetail /></Layout>
+              <Layout>
+                <RoleGuard page="groups">
+                  <GroupDetail />
+                </RoleGuard>
+              </Layout>
             </ProtectedRouteWrapper>
           }
         />
@@ -253,7 +285,11 @@ const AppContent = () => {
           path="/profile"
           element={
             <ProtectedRouteWrapper>
-              <Layout><Profile /></Layout>
+              <Layout>
+                <RoleGuard page="profile">
+                  <Profile />
+                </RoleGuard>
+              </Layout>
             </ProtectedRouteWrapper>
           }
         />
@@ -261,7 +297,11 @@ const AppContent = () => {
           path="/settings"
           element={
             <ProtectedRouteWrapper>
-              <Layout><Settings /></Layout>
+              <Layout>
+                <RoleGuard page="settings">
+                  <Settings />
+                </RoleGuard>
+              </Layout>
             </ProtectedRouteWrapper>
           }
         />
@@ -269,7 +309,23 @@ const AppContent = () => {
           path="/reports"
           element={
             <ProtectedRouteWrapper>
-              <Layout><Reports /></Layout>
+              <Layout>
+                <RoleGuard page="reports">
+                  <Reports />
+                </RoleGuard>
+              </Layout>
+            </ProtectedRouteWrapper>
+          }
+        />
+        <Route
+          path="/cell-zones"
+          element={
+            <ProtectedRouteWrapper>
+              <Layout>
+                <RoleGuard page="cell-zones">
+                  <CellZones />
+                </RoleGuard>
+              </Layout>
             </ProtectedRouteWrapper>
           }
         />
@@ -277,7 +333,11 @@ const AppContent = () => {
           path="/finances"
           element={
             <ProtectedRouteWrapper>
-              <Layout><Finance /></Layout>
+              <Layout>
+                <RoleGuard page="finance">
+                  <Finance />
+                </RoleGuard>
+              </Layout>
             </ProtectedRouteWrapper>
           }
         />
@@ -287,28 +347,37 @@ const AppContent = () => {
   );
 };
 
-const App = () => (
-  <Auth0Provider
-    domain={auth0Config.domain}
-    clientId={auth0Config.clientId}
-    authorizationParams={{
-      redirect_uri: auth0Config.redirectUri,
-      audience: auth0Config.audience,
-      scope: auth0Config.scope
-    }}
-    cacheLocation="localstorage"
-    useRefreshTokens={true}
-  >
-    <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <AppContent />
-        </TooltipProvider>
-      </QueryClientProvider>
-    </Provider>
-  </Auth0Provider>
-);
+const App = () => {
+  // Handle Auth0 redirect callback — ensures returnTo works for invitation flow
+  const onRedirectCallback = (appState?: { returnTo?: string }) => {
+    const returnTo = appState?.returnTo || window.location.pathname;
+    window.history.replaceState({}, document.title, returnTo);
+  };
+
+  return (
+    <Auth0Provider
+      domain={auth0Config.domain}
+      clientId={auth0Config.clientId}
+      authorizationParams={{
+        redirect_uri: auth0Config.redirectUri,
+        audience: auth0Config.audience,
+        scope: auth0Config.scope
+      }}
+      cacheLocation="localstorage"
+      useRefreshTokens={true}
+      onRedirectCallback={onRedirectCallback}
+    >
+      <Provider store={store}>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <AppContent />
+          </TooltipProvider>
+        </QueryClientProvider>
+      </Provider>
+    </Auth0Provider>
+  );
+};
 
 export default App;

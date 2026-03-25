@@ -1,5 +1,4 @@
 import { combineReducers } from 'redux';
-import categoryReducer from './categoryReducer';
 import authReducer from './authReducer';
 import memberReducer from './memberReducers';
 import attendanceReducer from './attendanceReducer';
@@ -10,17 +9,15 @@ import roleReducer from './roleReducer';
 import cellZoneReducer from './cellZoneReducer';
 
 const rootReducer = combineReducers({
-  categories: categoryReducer,
-  members: memberReducer,
   auth: authReducer,
+  members: memberReducer,
   attendance: attendanceReducer,
   groups: groupReducer,
   reports: reportReducer,
-  financeReducer: financeReducer,
+  finance: financeReducer, // ← fixed key name
   roles: roleReducer,
   cellZones: cellZoneReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
-
 export default rootReducer;

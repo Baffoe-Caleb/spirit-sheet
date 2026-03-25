@@ -211,9 +211,41 @@ export interface MemberPhotoResponse {
   success: boolean;
   message?: string;
   data?: {
-    photo: string;
+    photoId: string;
+    photoUrl: string;
+    memberId: string;
   };
 }
+
+// Helper to build full photo URL from photo field value.
+// The photo field can be:
+//   - A MongoDB ObjectId like "69c444c0e438048d81209b13" (from member GET responses)
+//   - A relative path like "/api/uploads/69c444c0e438048d81209b13" (from photo POST response)
+//   - A full URL (already usable)
+//   - A data: URI (already usable)
+export const getFullPhotoUrl = (photo?: string): string | undefined => {
+  if (!photo) return undefined;
+
+  // Already a full URL or data URI
+  if (photo.startsWith('http://') || photo.startsWith('https://') || photo.startsWith('data:')) {
+    return photo;
+  }
+
+  const baseUrl = "http://localhost:5000";
+
+  // Relative path like "/api/uploads/..."
+  if (photo.startsWith('/')) {
+    return `${baseUrl}${photo}`;
+  }
+
+  // MongoDB ObjectId (24-char hex string) — build the uploads URL
+  if (/^[a-f0-9]{24}$/i.test(photo)) {
+    return `${baseUrl}/api/uploads/${photo}`;
+  }
+
+  // Fallback — treat as relative path
+  return `${baseUrl}/${photo}`;
+};
 
 export interface CheckInactivityResponse {
   success: boolean;
@@ -1765,6 +1797,34 @@ const getRoleInvitations = (params?: GetInvitationsParams): Promise<ApiResponse<
   return createApi.get(`/api/roles/invitations${queryString ? `?${queryString}` : ''}`);
 };
 
+// Verify invitation token (public — no auth required)
+const verifyInvitation = (token: string): Promise<ApiResponse<{
+  success: boolean;
+  message?: string;
+  data: {
+    email: string;
+    role: string;
+    organizationName: string;
+    invitedBy?: string;
+    expiresAt: string;
+  };
+}>> => createApi.get(`/api/roles/invitations/verify?token=${encodeURIComponent(token)}`);
+
+// Accept invitation (requires auth)
+const acceptInvitation = (data: {
+  token: string;
+  auth0Id: string;
+  email: string;
+  name: string;
+}): Promise<ApiResponse<{
+  success: boolean;
+  message?: string;
+  data?: {
+    user: UserData;
+    organization: OrganizationData;
+  };
+}>> => createApi.post('/api/roles/invitations/accept', data);
+
 // ============================================
 // CELL & ZONE ENDPOINTS
 // ============================================
@@ -2329,6 +2389,8 @@ export {
   getRolePermissions,
   updateRolePermissions,
   getRoleInvitations,
+  verifyInvitation,
+  acceptInvitation,
   // Cell & Zones
   createCellZone,
   getCellZones,
