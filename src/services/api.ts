@@ -200,10 +200,11 @@ export interface BulkUploadMembersResponse {
   success: boolean;
   message?: string;
   data?: {
-    imported: number;
+    total: number;
+    inserted: number;
     skipped: number;
-    failed: number;
-    errors?: { row: number; message: string }[];
+    errorCount: number;
+    errors?: { row: number; error: string; data?: any }[];
   };
 }
 
@@ -251,8 +252,8 @@ export interface CheckInactivityResponse {
   success: boolean;
   message?: string;
   data?: {
-    markedInactive: number;
-    members?: { id: string; name: string }[];
+    totalProcessed: number;
+    totalMarkedInactive: number;
   };
 }
 

@@ -50,7 +50,7 @@ const ROLE_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 const INVITABLE_ROLES = [
-  { value: 'admin', label: 'Administrator' },
+  { value: 'administrator', label: 'Administrator' },
   { value: 'secretary', label: 'Secretary' },
   { value: 'usher', label: 'Usher' },
   { value: 'member', label: 'Member' },
@@ -150,7 +150,7 @@ const Profile = () => {
     if (inactivityCheckSuccess && inactivityResult) {
       toast({
         title: "Inactivity Check Complete",
-        description: `${inactivityResult.markedInactive} members marked inactive`,
+        description: `${inactivityResult.totalMarkedInactive ?? inactivityResult.markedInactive ?? 0} members marked inactive`,
       });
       dispatch(resetMemberOperation());
     }

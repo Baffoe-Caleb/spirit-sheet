@@ -83,7 +83,6 @@ import {
 import { fetchCellZonesRequest } from "@/redux/actions/cellZoneActions";
 import { Member, MemberFormData, getFullPhotoUrl } from "@/services/api";
 import { useRoleAccess } from "@/hooks/useRoleAccess";
-import MemberAvatar from "@/components/MemberAvatar";
 
 // ============================================
 // CONSTANTS
@@ -320,7 +319,7 @@ const Members = () => {
     } else if (bulkUploadSuccess && bulkUploadResult) {
       toast({
         title: "Bulk Upload Complete",
-        description: `${bulkUploadResult.imported} imported, ${bulkUploadResult.skipped} skipped, ${bulkUploadResult.failed} failed`,
+        description: `${bulkUploadResult.inserted} imported, ${bulkUploadResult.skipped} skipped, ${bulkUploadResult.errorCount} failed`,
       });
       setIsBulkUploadModalOpen(false);
       setBulkFile(null);
@@ -785,12 +784,12 @@ const Members = () => {
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div className="flex items-start gap-4">
-                          <MemberAvatar
-                            src={getFullPhotoUrl(member.photo)}
-                            firstName={member.firstName}
-                            lastName={member.lastName}
-                            size="md"
-                          />
+                          <Avatar className="h-12 w-12">
+                            {member.photo && <AvatarImage src={getFullPhotoUrl(member.photo)} />}
+                            <AvatarFallback className="bg-secondary text-secondary-foreground font-semibold">
+                              {getInitials(member.firstName, member.lastName)}
+                            </AvatarFallback>
+                          </Avatar>
                           <div className="flex-1">
                             <CardTitle className="text-lg">
                               {member.firstName} {member.lastName}
@@ -1026,11 +1025,11 @@ const Members = () => {
             {bulkUploadResult && (
               <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm">
                 <p className="font-medium text-green-800">Upload Results:</p>
-                <p className="text-green-700">{bulkUploadResult.imported} imported, {bulkUploadResult.skipped} skipped, {bulkUploadResult.failed} failed</p>
+                <p className="text-green-700">{bulkUploadResult.inserted} imported, {bulkUploadResult.skipped} skipped, {bulkUploadResult.errorCount} failed</p>
                 {bulkUploadResult.errors && bulkUploadResult.errors.length > 0 && (
                   <div className="mt-2 max-h-32 overflow-y-auto">
                     {bulkUploadResult.errors.map((err, i) => (
-                      <p key={i} className="text-red-600 text-xs">Row {err.row}: {err.message}</p>
+                      <p key={i} className="text-red-600 text-xs">Row {err.row}: {err.error}</p>
                     ))}
                   </div>
                 )}

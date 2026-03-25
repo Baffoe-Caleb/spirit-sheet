@@ -67,15 +67,16 @@ export const RESET_MEMBER_OPERATION = 'members/RESET_OPERATION';
 // ============================================
 
 export interface BulkUploadResult {
-  imported: number;
+  total: number;
+  inserted: number;
   skipped: number;
-  failed: number;
-  errors?: { row: number; message: string }[];
+  errorCount: number;
+  errors?: { row: number; error: string; data?: any }[];
 }
 
 export interface InactivityResult {
-  markedInactive: number;
-  members?: { id: string; name: string }[];
+  totalProcessed: number;
+  totalMarkedInactive: number;
 }
 
 // ============================================
