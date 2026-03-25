@@ -1,60 +1,62 @@
-// src/redux/reducers/memberReducer.ts
+// src/redux/reducers/cellZoneReducer.ts
 
-import { Member, PaginationInfo } from '../../services/api';
+import { CellZone, Member, PaginationInfo } from '../../services/api';
 import {
-  FETCH_MEMBERS_REQUEST,
-  FETCH_MEMBERS_SUCCESS,
-  FETCH_MEMBERS_FAILURE,
-  FETCH_MEMBER_REQUEST,
-  FETCH_MEMBER_SUCCESS,
-  FETCH_MEMBER_FAILURE,
-  CREATE_MEMBER_REQUEST,
-  CREATE_MEMBER_SUCCESS,
-  CREATE_MEMBER_FAILURE,
-  UPDATE_MEMBER_REQUEST,
-  UPDATE_MEMBER_SUCCESS,
-  UPDATE_MEMBER_FAILURE,
-  DELETE_MEMBER_REQUEST,
-  DELETE_MEMBER_SUCCESS,
-  DELETE_MEMBER_FAILURE,
-  SEARCH_MEMBERS_REQUEST,
-  SEARCH_MEMBERS_SUCCESS,
-  SEARCH_MEMBERS_FAILURE,
-  CLEAR_MEMBER_ERROR,
-  CLEAR_SELECTED_MEMBER,
-  RESET_MEMBER_STATE,
-  MemberActionTypes,
-} from '../actions/memberActions';
+  FETCH_CELL_ZONES_REQUEST,
+  FETCH_CELL_ZONES_SUCCESS,
+  FETCH_CELL_ZONES_FAILURE,
+  FETCH_CELL_ZONE_REQUEST,
+  FETCH_CELL_ZONE_SUCCESS,
+  FETCH_CELL_ZONE_FAILURE,
+  CREATE_CELL_ZONE_REQUEST,
+  CREATE_CELL_ZONE_SUCCESS,
+  CREATE_CELL_ZONE_FAILURE,
+  UPDATE_CELL_ZONE_REQUEST,
+  UPDATE_CELL_ZONE_SUCCESS,
+  UPDATE_CELL_ZONE_FAILURE,
+  DELETE_CELL_ZONE_REQUEST,
+  DELETE_CELL_ZONE_SUCCESS,
+  DELETE_CELL_ZONE_FAILURE,
+  FETCH_CELL_ZONE_MEMBERS_REQUEST,
+  FETCH_CELL_ZONE_MEMBERS_SUCCESS,
+  FETCH_CELL_ZONE_MEMBERS_FAILURE,
+  CLEAR_CELL_ZONE_ERROR,
+  CLEAR_SELECTED_CELL_ZONE,
+  RESET_CELL_ZONE_OPERATION,
+  RESET_CELL_ZONE_STATE,
+  CellZoneActionTypes,
+} from '../actions/cellZoneActions';
 
 // ============================================
 // STATE INTERFACE
 // ============================================
 
-export interface MemberState {
-  // List of members
-  members: Member[];
-  pagination: PaginationInfo | null;
-  
-  // Selected member for viewing/editing
-  selectedMember: Member | null;
-  
-  // Search results
-  searchResults: Member[];
-  
+export interface CellZoneState {
+  // List
+  cellZones: CellZone[];
+
+  // Selected
+  selectedCellZone: CellZone | null;
+
+  // Members of selected cell/zone
+  cellZoneMembers: Member[];
+  membersPagination: PaginationInfo | null;
+
   // Loading states
   isLoading: boolean;
   isCreating: boolean;
   isUpdating: boolean;
   isDeleting: boolean;
-  isSearching: boolean;
-  
+  isLoadingMembers: boolean;
+
   // Error states
   error: string | null;
   createError: string | null;
   updateError: string | null;
   deleteError: string | null;
-  
-  // Success flags (for closing modals, showing toasts, etc.)
+  membersError: string | null;
+
+  // Success flags
   createSuccess: boolean;
   updateSuccess: boolean;
   deleteSuccess: boolean;
@@ -64,20 +66,21 @@ export interface MemberState {
 // INITIAL STATE
 // ============================================
 
-const initialState: MemberState = {
-  members: [],
-  pagination: null,
-  selectedMember: null,
-  searchResults: [],
+const initialState: CellZoneState = {
+  cellZones: [],
+  selectedCellZone: null,
+  cellZoneMembers: [],
+  membersPagination: null,
   isLoading: false,
   isCreating: false,
   isUpdating: false,
   isDeleting: false,
-  isSearching: false,
+  isLoadingMembers: false,
   error: null,
   createError: null,
   updateError: null,
   deleteError: null,
+  membersError: null,
   createSuccess: false,
   updateSuccess: false,
   deleteSuccess: false,
@@ -87,31 +90,30 @@ const initialState: MemberState = {
 // REDUCER
 // ============================================
 
-const memberReducer = (
+const cellZoneReducer = (
   state = initialState,
-  action: MemberActionTypes
-): MemberState => {
+  action: CellZoneActionTypes
+): CellZoneState => {
   switch (action.type) {
     // ============================================
-    // FETCH MEMBERS
+    // FETCH CELL ZONES
     // ============================================
-    case FETCH_MEMBERS_REQUEST:
+    case FETCH_CELL_ZONES_REQUEST:
       return {
         ...state,
         isLoading: true,
         error: null,
       };
 
-    case FETCH_MEMBERS_SUCCESS:
+    case FETCH_CELL_ZONES_SUCCESS:
       return {
         ...state,
         isLoading: false,
-        members: action.payload.members,
-        pagination: action.payload.pagination,
+        cellZones: action.payload,
         error: null,
       };
 
-    case FETCH_MEMBERS_FAILURE:
+    case FETCH_CELL_ZONES_FAILURE:
       return {
         ...state,
         isLoading: false,
@@ -119,25 +121,25 @@ const memberReducer = (
       };
 
     // ============================================
-    // FETCH SINGLE MEMBER
+    // FETCH SINGLE CELL ZONE
     // ============================================
-    case FETCH_MEMBER_REQUEST:
+    case FETCH_CELL_ZONE_REQUEST:
       return {
         ...state,
         isLoading: true,
         error: null,
-        selectedMember: null,
+        selectedCellZone: null,
       };
 
-    case FETCH_MEMBER_SUCCESS:
+    case FETCH_CELL_ZONE_SUCCESS:
       return {
         ...state,
         isLoading: false,
-        selectedMember: action.payload,
+        selectedCellZone: action.payload,
         error: null,
       };
 
-    case FETCH_MEMBER_FAILURE:
+    case FETCH_CELL_ZONE_FAILURE:
       return {
         ...state,
         isLoading: false,
@@ -145,9 +147,9 @@ const memberReducer = (
       };
 
     // ============================================
-    // CREATE MEMBER
+    // CREATE CELL ZONE
     // ============================================
-    case CREATE_MEMBER_REQUEST:
+    case CREATE_CELL_ZONE_REQUEST:
       return {
         ...state,
         isCreating: true,
@@ -155,20 +157,16 @@ const memberReducer = (
         createSuccess: false,
       };
 
-    case CREATE_MEMBER_SUCCESS:
+    case CREATE_CELL_ZONE_SUCCESS:
       return {
         ...state,
         isCreating: false,
-        members: [action.payload, ...state.members],
+        cellZones: [action.payload, ...state.cellZones],
         createSuccess: true,
         createError: null,
-        // Update pagination total
-        pagination: state.pagination
-          ? { ...state.pagination, total: state.pagination.total + 1 }
-          : null,
       };
 
-    case CREATE_MEMBER_FAILURE:
+    case CREATE_CELL_ZONE_FAILURE:
       return {
         ...state,
         isCreating: false,
@@ -177,9 +175,9 @@ const memberReducer = (
       };
 
     // ============================================
-    // UPDATE MEMBER
+    // UPDATE CELL ZONE
     // ============================================
-    case UPDATE_MEMBER_REQUEST:
+    case UPDATE_CELL_ZONE_REQUEST:
       return {
         ...state,
         isUpdating: true,
@@ -187,22 +185,22 @@ const memberReducer = (
         updateSuccess: false,
       };
 
-    case UPDATE_MEMBER_SUCCESS:
+    case UPDATE_CELL_ZONE_SUCCESS:
       return {
         ...state,
         isUpdating: false,
-        members: state.members.map((member) =>
-          member._id === action.payload._id ? action.payload : member
+        cellZones: state.cellZones.map((cz) =>
+          cz._id === action.payload._id ? action.payload : cz
         ),
-        selectedMember:
-          state.selectedMember?._id === action.payload._id
+        selectedCellZone:
+          state.selectedCellZone?._id === action.payload._id
             ? action.payload
-            : state.selectedMember,
+            : state.selectedCellZone,
         updateSuccess: true,
         updateError: null,
       };
 
-    case UPDATE_MEMBER_FAILURE:
+    case UPDATE_CELL_ZONE_FAILURE:
       return {
         ...state,
         isUpdating: false,
@@ -211,9 +209,9 @@ const memberReducer = (
       };
 
     // ============================================
-    // DELETE MEMBER
+    // DELETE CELL ZONE
     // ============================================
-    case DELETE_MEMBER_REQUEST:
+    case DELETE_CELL_ZONE_REQUEST:
       return {
         ...state,
         isDeleting: true,
@@ -221,24 +219,20 @@ const memberReducer = (
         deleteSuccess: false,
       };
 
-    case DELETE_MEMBER_SUCCESS:
+    case DELETE_CELL_ZONE_SUCCESS:
       return {
         ...state,
         isDeleting: false,
-        members: state.members.filter((member) => member._id !== action.payload),
-        selectedMember:
-          state.selectedMember?._id === action.payload
+        cellZones: state.cellZones.filter((cz) => cz._id !== action.payload),
+        selectedCellZone:
+          state.selectedCellZone?._id === action.payload
             ? null
-            : state.selectedMember,
+            : state.selectedCellZone,
         deleteSuccess: true,
         deleteError: null,
-        // Update pagination total
-        pagination: state.pagination
-          ? { ...state.pagination, total: state.pagination.total - 1 }
-          : null,
       };
 
-    case DELETE_MEMBER_FAILURE:
+    case DELETE_CELL_ZONE_FAILURE:
       return {
         ...state,
         isDeleting: false,
@@ -247,49 +241,67 @@ const memberReducer = (
       };
 
     // ============================================
-    // SEARCH MEMBERS
+    // FETCH CELL ZONE MEMBERS
     // ============================================
-    case SEARCH_MEMBERS_REQUEST:
+    case FETCH_CELL_ZONE_MEMBERS_REQUEST:
       return {
         ...state,
-        isSearching: true,
-        error: null,
+        isLoadingMembers: true,
+        membersError: null,
       };
 
-    case SEARCH_MEMBERS_SUCCESS:
+    case FETCH_CELL_ZONE_MEMBERS_SUCCESS:
       return {
         ...state,
-        isSearching: false,
-        searchResults: action.payload,
-        error: null,
+        isLoadingMembers: false,
+        cellZoneMembers: action.payload.members,
+        membersPagination: action.payload.pagination || null,
+        membersError: null,
       };
 
-    case SEARCH_MEMBERS_FAILURE:
+    case FETCH_CELL_ZONE_MEMBERS_FAILURE:
       return {
         ...state,
-        isSearching: false,
-        error: action.payload,
+        isLoadingMembers: false,
+        membersError: action.payload,
       };
 
     // ============================================
-    // CLEAR STATES
+    // CLEAR / RESET
     // ============================================
-    case CLEAR_MEMBER_ERROR:
+    case CLEAR_CELL_ZONE_ERROR:
       return {
         ...state,
         error: null,
         createError: null,
         updateError: null,
         deleteError: null,
+        membersError: null,
       };
 
-    case CLEAR_SELECTED_MEMBER:
+    case CLEAR_SELECTED_CELL_ZONE:
       return {
         ...state,
-        selectedMember: null,
+        selectedCellZone: null,
+        cellZoneMembers: [],
+        membersPagination: null,
       };
 
-    case RESET_MEMBER_STATE:
+    case RESET_CELL_ZONE_OPERATION:
+      return {
+        ...state,
+        isCreating: false,
+        isUpdating: false,
+        isDeleting: false,
+        createSuccess: false,
+        updateSuccess: false,
+        deleteSuccess: false,
+        createError: null,
+        updateError: null,
+        deleteError: null,
+      };
+
+    case RESET_CELL_ZONE_STATE:
       return initialState;
 
     default:
@@ -297,4 +309,4 @@ const memberReducer = (
   }
 };
 
-export default memberReducer;
+export default cellZoneReducer;

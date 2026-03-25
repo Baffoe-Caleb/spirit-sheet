@@ -27,6 +27,7 @@ import NotFound from "./pages/NotFound";
 import RegisterChurch from "./pages/RegisterChurch";
 import { Loader2 } from "lucide-react";
 import auth0Config from "./auth0Config";
+import Finance from "./pages/Finance";
 
 const queryClient = new QueryClient();
 
@@ -269,6 +270,14 @@ const AppContent = () => {
           element={
             <ProtectedRouteWrapper>
               <Layout><Reports /></Layout>
+            </ProtectedRouteWrapper>
+          }
+        />
+        <Route
+          path="/finances"
+          element={
+            <ProtectedRouteWrapper>
+              <Layout><Finance /></Layout>
             </ProtectedRouteWrapper>
           }
         />

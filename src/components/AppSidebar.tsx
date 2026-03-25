@@ -1,4 +1,4 @@
-import { CheckCircle, Users, UsersRound, BarChart3, UserCircle, Settings, LogOut, BarChart2 } from "lucide-react";
+import { CheckCircle, Users, UsersRound, BarChart3, UserCircle, Settings, LogOut, BarChart2, DollarSign } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useDispatch } from "react-redux";
@@ -21,6 +21,7 @@ const mainItems = [
   { title: "Manage Members", url: "/members", icon: Users },
   { title: "Groups", url: "/groups", icon: UsersRound },
   { title: "View Reports", url: "/reports", icon: BarChart3 },
+  // { title: "View Finances", url: "/finances", icon: DollarSign },
 ];
 
 const bottomItems = [

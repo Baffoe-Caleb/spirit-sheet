@@ -1,6 +1,6 @@
 // src/pages/Members.tsx
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   Search,
@@ -16,10 +16,9 @@ import {
   ChevronRight,
   Loader2,
   Users,
-  X,
   Calendar,
 } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -65,7 +64,7 @@ import {
   createMemberRequest,
   updateMemberRequest,
   deleteMemberRequest,
-  clearMemberError,
+  resetMemberOperation,
 } from "@/redux/actions/memberActions";
 import { Member, MemberFormData } from "@/services/api";
 
@@ -93,6 +92,15 @@ const MARITAL_STATUS_OPTIONS = [
   { value: 'widowed', label: 'Widowed' },
 ];
 
+// NEW - Group options
+const GROUP_OPTIONS = [
+  { value: 'children', label: 'Children' },
+  { value: 'youth', label: 'Youth' },
+  { value: 'young_adult', label: 'Young Adult' },
+  { value: 'adult', label: 'Adult' },
+  { value: 'senior', label: 'Senior' },
+];
+
 const INITIAL_FORM_DATA: MemberFormData = {
   firstName: '',
   lastName: '',
@@ -103,7 +111,7 @@ const INITIAL_FORM_DATA: MemberFormData = {
   maritalStatus: undefined,
   membershipStatus: 'active',
   membershipDate: '',
-  group: '',
+  group: 'adult',
   address: {
     street: '',
     city: '',
@@ -143,7 +151,7 @@ const Members = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage] = useState(10);
 
   // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -155,9 +163,10 @@ const Members = () => {
   const [formData, setFormData] = useState<MemberFormData>(INITIAL_FORM_DATA);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
 
-
-  console.log(members);
-
+  // Refs to track if we initiated an operation
+  const isSubmittingRef = useRef(false);
+  const isUpdatingRef = useRef(false);
+  const isDeletingRef = useRef(false);
 
   // ============================================
   // EFFECTS
@@ -178,37 +187,59 @@ const Members = () => {
   // Debounced search
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (searchQuery !== undefined) {
-        setCurrentPage(1);
-        dispatch(
-          fetchMembersRequest({
-            page: 1,
-            limit: itemsPerPage,
-            search: searchQuery || undefined,
-            status: statusFilter !== 'all' ? statusFilter : undefined,
-          })
-        );
-      }
+      setCurrentPage(1);
+      dispatch(
+        fetchMembersRequest({
+          page: 1,
+          limit: itemsPerPage,
+          search: searchQuery || undefined,
+          status: statusFilter !== 'all' ? statusFilter : undefined,
+        })
+      );
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, dispatch, itemsPerPage, statusFilter]);
 
-  // Handle success states
+  // Handle CREATE success/error
   useEffect(() => {
-    if (createSuccess) {
+    if (!isSubmittingRef.current) return;
+
+    if (isCreating) return; // Still loading
+
+    if (createError) {
+      toast({
+        title: "Error",
+        description: createError,
+        variant: "destructive",
+      });
+      isSubmittingRef.current = false;
+    } else if (createSuccess) {
       toast({
         title: "Success",
         description: "Member created successfully",
       });
       setIsAddModalOpen(false);
       setFormData(INITIAL_FORM_DATA);
-      dispatch(clearMemberError());
+      isSubmittingRef.current = false;
+      dispatch(resetMemberOperation());
     }
-  }, [createSuccess, toast, dispatch]);
+  }, [isCreating, createError, createSuccess, toast, dispatch]);
 
+  // Handle UPDATE success/error
   useEffect(() => {
-    if (updateSuccess) {
+    if (!isUpdatingRef.current) return;
+
+    if (isUpdating) return; // Still loading
+
+    if (updateError) {
+      toast({
+        title: "Error",
+        description: updateError,
+        variant: "destructive",
+      });
+      isUpdatingRef.current = false;
+    } else if (updateSuccess) {
       toast({
         title: "Success",
         description: "Member updated successfully",
@@ -216,23 +247,37 @@ const Members = () => {
       setIsEditModalOpen(false);
       setSelectedMember(null);
       setFormData(INITIAL_FORM_DATA);
-      dispatch(clearMemberError());
+      isUpdatingRef.current = false;
+      dispatch(resetMemberOperation());
     }
-  }, [updateSuccess, toast, dispatch]);
+  }, [isUpdating, updateError, updateSuccess, toast, dispatch]);
 
+  // Handle DELETE success/error
   useEffect(() => {
-    if (deleteSuccess) {
+    if (!isDeletingRef.current) return;
+
+    if (isDeleting) return; // Still loading
+
+    if (deleteError) {
+      toast({
+        title: "Error",
+        description: deleteError,
+        variant: "destructive",
+      });
+      isDeletingRef.current = false;
+    } else if (deleteSuccess) {
       toast({
         title: "Success",
         description: "Member deleted successfully",
       });
       setIsDeleteDialogOpen(false);
       setSelectedMember(null);
-      dispatch(clearMemberError());
+      isDeletingRef.current = false;
+      dispatch(resetMemberOperation());
     }
-  }, [deleteSuccess, toast, dispatch]);
+  }, [isDeleting, deleteError, deleteSuccess, toast, dispatch]);
 
-  // Handle error states
+  // Handle fetch error
   useEffect(() => {
     if (error) {
       toast({
@@ -242,36 +287,6 @@ const Members = () => {
       });
     }
   }, [error, toast]);
-
-  useEffect(() => {
-    if (createError) {
-      toast({
-        title: "Error",
-        description: createError,
-        variant: "destructive",
-      });
-    }
-  }, [createError, toast]);
-
-  useEffect(() => {
-    if (updateError) {
-      toast({
-        title: "Error",
-        description: updateError,
-        variant: "destructive",
-      });
-    }
-  }, [updateError, toast]);
-
-  useEffect(() => {
-    if (deleteError) {
-      toast({
-        title: "Error",
-        description: deleteError,
-        variant: "destructive",
-      });
-    }
-  }, [deleteError, toast]);
 
   // ============================================
   // HANDLERS
@@ -308,6 +323,7 @@ const Members = () => {
 
   const handleAddMember = () => {
     setFormData(INITIAL_FORM_DATA);
+    dispatch(resetMemberOperation());
     setIsAddModalOpen(true);
   };
 
@@ -327,6 +343,7 @@ const Members = () => {
       address: member.address || {},
       notes: member.notes || '',
     });
+    dispatch(resetMemberOperation());
     setIsEditModalOpen(true);
   };
 
@@ -337,29 +354,46 @@ const Members = () => {
 
   const handleDeleteClick = (member: Member) => {
     setSelectedMember(member);
+    dispatch(resetMemberOperation());
     setIsDeleteDialogOpen(true);
   };
 
   const handleSubmitCreate = (e: React.FormEvent) => {
     e.preventDefault();
+    isSubmittingRef.current = true;
     dispatch(createMemberRequest(formData));
   };
 
   const handleSubmitUpdate = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedMember) {
+      isUpdatingRef.current = true;
       dispatch(updateMemberRequest(selectedMember._id, formData));
     }
   };
 
   const handleConfirmDelete = () => {
     if (selectedMember) {
+      isDeletingRef.current = true;
       dispatch(deleteMemberRequest(selectedMember._id));
     }
   };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+  };
+
+  const handleCloseAddModal = () => {
+    if (isCreating) return; // Prevent closing while submitting
+    setIsAddModalOpen(false);
+    setFormData(INITIAL_FORM_DATA);
+  };
+
+  const handleCloseEditModal = () => {
+    if (isUpdating) return; // Prevent closing while submitting
+    setIsEditModalOpen(false);
+    setFormData(INITIAL_FORM_DATA);
+    setSelectedMember(null);
   };
 
   // ============================================
@@ -400,6 +434,7 @@ const Members = () => {
             onChange={handleInputChange}
             placeholder="John"
             required
+            disabled={isCreating || isUpdating}
           />
         </div>
         <div className="space-y-2">
@@ -411,6 +446,7 @@ const Members = () => {
             onChange={handleInputChange}
             placeholder="Doe"
             required
+            disabled={isCreating || isUpdating}
           />
         </div>
       </div>
@@ -425,6 +461,7 @@ const Members = () => {
             value={formData.email}
             onChange={handleInputChange}
             placeholder="john@example.com"
+            disabled={isCreating || isUpdating}
           />
         </div>
         <div className="space-y-2">
@@ -435,6 +472,7 @@ const Members = () => {
             value={formData.phone}
             onChange={handleInputChange}
             placeholder="(555) 123-4567"
+            disabled={isCreating || isUpdating}
           />
         </div>
       </div>
@@ -448,6 +486,7 @@ const Members = () => {
             type="date"
             value={formData.dateOfBirth}
             onChange={handleInputChange}
+            disabled={isCreating || isUpdating}
           />
         </div>
         <div className="space-y-2">
@@ -455,6 +494,7 @@ const Members = () => {
           <Select
             value={formData.gender || ''}
             onValueChange={(value) => handleSelectChange('gender', value)}
+            disabled={isCreating || isUpdating}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select gender" />
@@ -476,6 +516,7 @@ const Members = () => {
           <Select
             value={formData.maritalStatus || ''}
             onValueChange={(value) => handleSelectChange('maritalStatus', value)}
+            disabled={isCreating || isUpdating}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select status" />
@@ -494,6 +535,7 @@ const Members = () => {
           <Select
             value={formData.membershipStatus || 'active'}
             onValueChange={(value) => handleSelectChange('membershipStatus', value)}
+            disabled={isCreating || isUpdating}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select status" />
@@ -518,17 +560,27 @@ const Members = () => {
             type="date"
             value={formData.membershipDate}
             onChange={handleInputChange}
+            disabled={isCreating || isUpdating}
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="group">Group</Label>
-          <Input
-            id="group"
-            name="group"
-            value={formData.group}
-            onChange={handleInputChange}
-            placeholder="e.g., Youth, Women's Ministry"
-          />
+          <Select
+            value={formData.group || 'adult'}
+            onValueChange={(value) => handleSelectChange('group', value)}
+            disabled={isCreating || isUpdating}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select group" />
+            </SelectTrigger>
+            <SelectContent>
+              {GROUP_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -541,6 +593,7 @@ const Members = () => {
           onChange={handleInputChange}
           placeholder="Additional notes..."
           rows={3}
+          disabled={isCreating || isUpdating}
         />
       </div>
 
@@ -548,7 +601,8 @@ const Members = () => {
         <Button
           type="button"
           variant="outline"
-          onClick={() => isEdit ? setIsEditModalOpen(false) : setIsAddModalOpen(false)}
+          onClick={isEdit ? handleCloseEditModal : handleCloseAddModal}
+          disabled={isCreating || isUpdating}
         >
           Cancel
         </Button>
@@ -620,7 +674,7 @@ const Members = () => {
       )}
 
       {/* Empty State */}
-      {members.length === 0 && (
+      {!isLoading && members.length === 0 && (
         <Card className="shadow-soft">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Users className="h-12 w-12 text-muted-foreground mb-4" />
@@ -786,7 +840,7 @@ const Members = () => {
       )}
 
       {/* Add Member Modal */}
-      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+      <Dialog open={isAddModalOpen} onOpenChange={handleCloseAddModal}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add New Member</DialogTitle>
@@ -799,7 +853,7 @@ const Members = () => {
       </Dialog>
 
       {/* Edit Member Modal */}
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+      <Dialog open={isEditModalOpen} onOpenChange={handleCloseEditModal}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Member</DialogTitle>
@@ -909,7 +963,7 @@ const Members = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
               className="bg-red-600 hover:bg-red-700"

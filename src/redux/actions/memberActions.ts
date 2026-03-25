@@ -36,10 +36,47 @@ export const SEARCH_MEMBERS_REQUEST = 'members/SEARCH_REQUEST';
 export const SEARCH_MEMBERS_SUCCESS = 'members/SEARCH_SUCCESS';
 export const SEARCH_MEMBERS_FAILURE = 'members/SEARCH_FAILURE';
 
+// Bulk Upload Members
+export const BULK_UPLOAD_MEMBERS_REQUEST = 'members/BULK_UPLOAD_REQUEST';
+export const BULK_UPLOAD_MEMBERS_SUCCESS = 'members/BULK_UPLOAD_SUCCESS';
+export const BULK_UPLOAD_MEMBERS_FAILURE = 'members/BULK_UPLOAD_FAILURE';
+
+// Upload Member Photo
+export const UPLOAD_MEMBER_PHOTO_REQUEST = 'members/UPLOAD_PHOTO_REQUEST';
+export const UPLOAD_MEMBER_PHOTO_SUCCESS = 'members/UPLOAD_PHOTO_SUCCESS';
+export const UPLOAD_MEMBER_PHOTO_FAILURE = 'members/UPLOAD_PHOTO_FAILURE';
+
+// Delete Member Photo
+export const DELETE_MEMBER_PHOTO_REQUEST = 'members/DELETE_PHOTO_REQUEST';
+export const DELETE_MEMBER_PHOTO_SUCCESS = 'members/DELETE_PHOTO_SUCCESS';
+export const DELETE_MEMBER_PHOTO_FAILURE = 'members/DELETE_PHOTO_FAILURE';
+
+// Check Inactivity
+export const CHECK_INACTIVITY_REQUEST = 'members/CHECK_INACTIVITY_REQUEST';
+export const CHECK_INACTIVITY_SUCCESS = 'members/CHECK_INACTIVITY_SUCCESS';
+export const CHECK_INACTIVITY_FAILURE = 'members/CHECK_INACTIVITY_FAILURE';
+
 // Clear States
 export const CLEAR_MEMBER_ERROR = 'members/CLEAR_ERROR';
 export const CLEAR_SELECTED_MEMBER = 'members/CLEAR_SELECTED';
 export const RESET_MEMBER_STATE = 'members/RESET_STATE';
+export const RESET_MEMBER_OPERATION = 'members/RESET_OPERATION';
+
+// ============================================
+// BULK UPLOAD RESULT TYPE
+// ============================================
+
+export interface BulkUploadResult {
+  imported: number;
+  skipped: number;
+  failed: number;
+  errors?: { row: number; message: string }[];
+}
+
+export interface InactivityResult {
+  markedInactive: number;
+  members?: { id: string; name: string }[];
+}
 
 // ============================================
 // ACTION INTERFACES
@@ -50,15 +87,10 @@ interface FetchMembersRequestAction {
   type: typeof FETCH_MEMBERS_REQUEST;
   payload?: GetMembersParams;
 }
-
 interface FetchMembersSuccessAction {
   type: typeof FETCH_MEMBERS_SUCCESS;
-  payload: {
-    members: Member[];
-    pagination: PaginationInfo;
-  };
+  payload: { members: Member[]; pagination: PaginationInfo };
 }
-
 interface FetchMembersFailureAction {
   type: typeof FETCH_MEMBERS_FAILURE;
   payload: string;
@@ -69,12 +101,10 @@ interface FetchMemberRequestAction {
   type: typeof FETCH_MEMBER_REQUEST;
   payload: string;
 }
-
 interface FetchMemberSuccessAction {
   type: typeof FETCH_MEMBER_SUCCESS;
   payload: Member;
 }
-
 interface FetchMemberFailureAction {
   type: typeof FETCH_MEMBER_FAILURE;
   payload: string;
@@ -85,12 +115,10 @@ interface CreateMemberRequestAction {
   type: typeof CREATE_MEMBER_REQUEST;
   payload: MemberFormData;
 }
-
 interface CreateMemberSuccessAction {
   type: typeof CREATE_MEMBER_SUCCESS;
   payload: Member;
 }
-
 interface CreateMemberFailureAction {
   type: typeof CREATE_MEMBER_FAILURE;
   payload: string;
@@ -99,17 +127,12 @@ interface CreateMemberFailureAction {
 // Update Member
 interface UpdateMemberRequestAction {
   type: typeof UPDATE_MEMBER_REQUEST;
-  payload: {
-    id: string;
-    data: Partial<MemberFormData>;
-  };
+  payload: { id: string; data: Partial<MemberFormData> };
 }
-
 interface UpdateMemberSuccessAction {
   type: typeof UPDATE_MEMBER_SUCCESS;
   payload: Member;
 }
-
 interface UpdateMemberFailureAction {
   type: typeof UPDATE_MEMBER_FAILURE;
   payload: string;
@@ -120,12 +143,10 @@ interface DeleteMemberRequestAction {
   type: typeof DELETE_MEMBER_REQUEST;
   payload: string;
 }
-
 interface DeleteMemberSuccessAction {
   type: typeof DELETE_MEMBER_SUCCESS;
   payload: string;
 }
-
 interface DeleteMemberFailureAction {
   type: typeof DELETE_MEMBER_FAILURE;
   payload: string;
@@ -136,14 +157,67 @@ interface SearchMembersRequestAction {
   type: typeof SEARCH_MEMBERS_REQUEST;
   payload: string;
 }
-
 interface SearchMembersSuccessAction {
   type: typeof SEARCH_MEMBERS_SUCCESS;
   payload: Member[];
 }
-
 interface SearchMembersFailureAction {
   type: typeof SEARCH_MEMBERS_FAILURE;
+  payload: string;
+}
+
+// Bulk Upload Members
+interface BulkUploadMembersRequestAction {
+  type: typeof BULK_UPLOAD_MEMBERS_REQUEST;
+  payload: File;
+}
+interface BulkUploadMembersSuccessAction {
+  type: typeof BULK_UPLOAD_MEMBERS_SUCCESS;
+  payload: BulkUploadResult;
+}
+interface BulkUploadMembersFailureAction {
+  type: typeof BULK_UPLOAD_MEMBERS_FAILURE;
+  payload: string;
+}
+
+// Upload Member Photo
+interface UploadMemberPhotoRequestAction {
+  type: typeof UPLOAD_MEMBER_PHOTO_REQUEST;
+  payload: { memberId: string; photo: File };
+}
+interface UploadMemberPhotoSuccessAction {
+  type: typeof UPLOAD_MEMBER_PHOTO_SUCCESS;
+  payload: { memberId: string; photo: string };
+}
+interface UploadMemberPhotoFailureAction {
+  type: typeof UPLOAD_MEMBER_PHOTO_FAILURE;
+  payload: string;
+}
+
+// Delete Member Photo
+interface DeleteMemberPhotoRequestAction {
+  type: typeof DELETE_MEMBER_PHOTO_REQUEST;
+  payload: string; // memberId
+}
+interface DeleteMemberPhotoSuccessAction {
+  type: typeof DELETE_MEMBER_PHOTO_SUCCESS;
+  payload: string; // memberId
+}
+interface DeleteMemberPhotoFailureAction {
+  type: typeof DELETE_MEMBER_PHOTO_FAILURE;
+  payload: string;
+}
+
+// Check Inactivity
+interface CheckInactivityRequestAction {
+  type: typeof CHECK_INACTIVITY_REQUEST;
+}
+interface CheckInactivitySuccessAction {
+  type: typeof CHECK_INACTIVITY_SUCCESS;
+  payload: InactivityResult;
+}
+interface CheckInactivityFailureAction {
+  type: typeof CHECK_INACTIVITY_FAILURE;
   payload: string;
 }
 
@@ -151,13 +225,14 @@ interface SearchMembersFailureAction {
 interface ClearMemberErrorAction {
   type: typeof CLEAR_MEMBER_ERROR;
 }
-
 interface ClearSelectedMemberAction {
   type: typeof CLEAR_SELECTED_MEMBER;
 }
-
 interface ResetMemberStateAction {
   type: typeof RESET_MEMBER_STATE;
+}
+interface ResetMemberOperationAction {
+  type: typeof RESET_MEMBER_OPERATION;
 }
 
 // Union type for all actions
@@ -180,9 +255,22 @@ export type MemberActionTypes =
   | SearchMembersRequestAction
   | SearchMembersSuccessAction
   | SearchMembersFailureAction
+  | BulkUploadMembersRequestAction
+  | BulkUploadMembersSuccessAction
+  | BulkUploadMembersFailureAction
+  | UploadMemberPhotoRequestAction
+  | UploadMemberPhotoSuccessAction
+  | UploadMemberPhotoFailureAction
+  | DeleteMemberPhotoRequestAction
+  | DeleteMemberPhotoSuccessAction
+  | DeleteMemberPhotoFailureAction
+  | CheckInactivityRequestAction
+  | CheckInactivitySuccessAction
+  | CheckInactivityFailureAction
   | ClearMemberErrorAction
   | ClearSelectedMemberAction
-  | ResetMemberStateAction;
+  | ResetMemberStateAction
+  | ResetMemberOperationAction;
 
 // ============================================
 // ACTION CREATORS
@@ -290,6 +378,79 @@ export const searchMembersFailure = (error: string): SearchMembersFailureAction 
   payload: error,
 });
 
+// Bulk Upload Members
+export const bulkUploadMembersRequest = (file: File): BulkUploadMembersRequestAction => ({
+  type: BULK_UPLOAD_MEMBERS_REQUEST,
+  payload: file,
+});
+
+export const bulkUploadMembersSuccess = (
+  result: BulkUploadResult
+): BulkUploadMembersSuccessAction => ({
+  type: BULK_UPLOAD_MEMBERS_SUCCESS,
+  payload: result,
+});
+
+export const bulkUploadMembersFailure = (error: string): BulkUploadMembersFailureAction => ({
+  type: BULK_UPLOAD_MEMBERS_FAILURE,
+  payload: error,
+});
+
+// Upload Member Photo
+export const uploadMemberPhotoRequest = (
+  memberId: string,
+  photo: File
+): UploadMemberPhotoRequestAction => ({
+  type: UPLOAD_MEMBER_PHOTO_REQUEST,
+  payload: { memberId, photo },
+});
+
+export const uploadMemberPhotoSuccess = (
+  memberId: string,
+  photo: string
+): UploadMemberPhotoSuccessAction => ({
+  type: UPLOAD_MEMBER_PHOTO_SUCCESS,
+  payload: { memberId, photo },
+});
+
+export const uploadMemberPhotoFailure = (error: string): UploadMemberPhotoFailureAction => ({
+  type: UPLOAD_MEMBER_PHOTO_FAILURE,
+  payload: error,
+});
+
+// Delete Member Photo
+export const deleteMemberPhotoRequest = (memberId: string): DeleteMemberPhotoRequestAction => ({
+  type: DELETE_MEMBER_PHOTO_REQUEST,
+  payload: memberId,
+});
+
+export const deleteMemberPhotoSuccess = (memberId: string): DeleteMemberPhotoSuccessAction => ({
+  type: DELETE_MEMBER_PHOTO_SUCCESS,
+  payload: memberId,
+});
+
+export const deleteMemberPhotoFailure = (error: string): DeleteMemberPhotoFailureAction => ({
+  type: DELETE_MEMBER_PHOTO_FAILURE,
+  payload: error,
+});
+
+// Check Inactivity
+export const checkInactivityRequest = (): CheckInactivityRequestAction => ({
+  type: CHECK_INACTIVITY_REQUEST,
+});
+
+export const checkInactivitySuccess = (
+  result: InactivityResult
+): CheckInactivitySuccessAction => ({
+  type: CHECK_INACTIVITY_SUCCESS,
+  payload: result,
+});
+
+export const checkInactivityFailure = (error: string): CheckInactivityFailureAction => ({
+  type: CHECK_INACTIVITY_FAILURE,
+  payload: error,
+});
+
 // Clear States
 export const clearMemberError = (): ClearMemberErrorAction => ({
   type: CLEAR_MEMBER_ERROR,
@@ -301,4 +462,8 @@ export const clearSelectedMember = (): ClearSelectedMemberAction => ({
 
 export const resetMemberState = (): ResetMemberStateAction => ({
   type: RESET_MEMBER_STATE,
+});
+
+export const resetMemberOperation = (): ResetMemberOperationAction => ({
+  type: RESET_MEMBER_OPERATION,
 });
